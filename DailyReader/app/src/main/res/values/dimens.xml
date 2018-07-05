@@ -1,0 +1,11 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_20_sp">18sp</dimen>
+
+    <dimen name="primary_margin">16dp</dimen>
+    <dimen name="find_recycler_item_height">96dp</dimen>
+    <dimen name="item_text_size">16sp</dimen>
+
+    <dimen name="item_image_height">54dp</dimen>
+    <dimen name="item_image_width">72dp</dimen>
+</resources>
