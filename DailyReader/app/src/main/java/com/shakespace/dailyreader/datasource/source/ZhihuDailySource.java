@@ -1,6 +1,9 @@
 package com.shakespace.dailyreader.datasource.source;
 
 import com.shakespace.dailyreader.bean.ZhihuDailyBean;
+import com.shakespace.dailyreader.bean.ZhihuStory;
+
+import java.util.List;
 
 import io.reactivex.Observer;
 
@@ -16,7 +19,7 @@ public interface ZhihuDailySource {
      * @param date  日期
      * @param observer  观察者
      */
-    void  loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, Observer<ZhihuDailyBean> observer);
+    void  loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, Observer<List<ZhihuStory>> observer);
 }
 
 

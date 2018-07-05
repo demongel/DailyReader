@@ -55,12 +55,12 @@ public class ZhihuDailyLocalSource implements ZhihuDailySource {
     }
 
     @Override
-    public void loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, Observer<ZhihuDailyBean> observer) {
+    public void loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, Observer<List<ZhihuStory>> observer) {
         ZhihuStoryDao zhihuStoryDao = App.getDaoSession().getZhihuStoryDao();
         String pDate=DateFormatUtil.getZhihuPreviousDay(date);
         List<ZhihuStory> stories = zhihuStoryDao._queryZhihuDailyBean_Stories(pDate);
         if(stories!=null && !stories.isEmpty()){
-            observer.onNext(new ZhihuDailyBean(pDate,stories));
+            observer.onNext(stories);
         }else{
             observer.onError(new Exception("no data"));
         }

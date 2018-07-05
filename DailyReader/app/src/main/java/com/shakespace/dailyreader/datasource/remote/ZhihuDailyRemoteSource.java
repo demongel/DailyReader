@@ -3,7 +3,10 @@ package com.shakespace.dailyreader.datasource.remote;
 import com.shakespace.dailyreader.api.Api;
 import com.shakespace.dailyreader.api.RetrofitService;
 import com.shakespace.dailyreader.bean.ZhihuDailyBean;
+import com.shakespace.dailyreader.bean.ZhihuStory;
 import com.shakespace.dailyreader.datasource.source.ZhihuDailySource;
+
+import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -28,8 +31,9 @@ public class ZhihuDailyRemoteSource implements ZhihuDailySource {
     }
 
     @Override
-    public void loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, final Observer<ZhihuDailyBean> observer) {
+    public void loadZhihuDailySource(boolean forceUpdate, boolean cleanCache, String date, final Observer<List<ZhihuStory>> observer) {
 
+        //  访问知乎Api 直接返回的是一个ZhihuDailyBean
         RetrofitService.createZhihuDailyService(Api.ZHIHU_DAILY_BASE)
                 .getZhihuDaily(date)
                 .take(1)    // 返回一个
@@ -43,7 +47,12 @@ public class ZhihuDailyRemoteSource implements ZhihuDailySource {
 
                     @Override
                     public void onNext(ZhihuDailyBean zhihuDailyBean) {
-                        observer.onNext(zhihuDailyBean);
+                        List<ZhihuStory> zhihuStories = zhihuDailyBean.getStories();
+                        String date = zhihuDailyBean.getDate();
+                        for(ZhihuStory story:zhihuStories){
+                            story.setDate(date);
+                        }
+                        observer.onNext(zhihuStories);
                     }
 
                     @Override

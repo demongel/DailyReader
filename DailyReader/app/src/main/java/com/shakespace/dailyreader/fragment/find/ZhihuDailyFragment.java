@@ -41,8 +41,10 @@ public class ZhihuDailyFragment extends BaseFragment implements ZhihuDailyContra
     private ZhihuDailyPresenter mPresenter = new ZhihuDailyPresenter(this, ZhihuDailyLoader.getInstance());
     private List<ZhihuStory> mStories;
     private ZhihuDailyAdapter mAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
     private int mYear, mMonth, mDay;    //年月日
     private boolean isFirstLoad = true;
+
     public ZhihuDailyFragment() {
         // Required empty public constructor
     }
@@ -53,7 +55,8 @@ public class ZhihuDailyFragment extends BaseFragment implements ZhihuDailyContra
 
         mAdapter = new ZhihuDailyAdapter(getActivity(), mStories);
         mReayclerView.setAdapter(mAdapter);
-        mReayclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLinearLayoutManager = new LinearLayoutManager(getContext());
+        mReayclerView.setLayoutManager(mLinearLayoutManager);
 
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -61,9 +64,36 @@ public class ZhihuDailyFragment extends BaseFragment implements ZhihuDailyContra
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeZone(TimeZone.getTimeZone("GMT+08"));
                 String date = DateFormatUtil.formatZhihuDailyDateLongToString(calendar.getTimeInMillis());
-                mPresenter.load(true,true,date);
+                mPresenter.load(true, true, date);
             }
         });
+
+        mReayclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (mStories != null) {
+                    // 获取最后一个可见视图的位置 是否和 集合大小相同时  加载更多
+                    if (mLinearLayoutManager.findLastCompletelyVisibleItemPosition() == (mStories.size() - 1)) {
+                        loadMore();
+                    }
+                }
+            }
+        });
+
+    }
+
+    private void loadMore() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+08"));
+        calendar.set(mYear, mMonth, --mDay);
+        String date = DateFormatUtil.formatZhihuDailyDateLongToString(calendar.getTimeInMillis());
+        mPresenter.load(true, false, date);
     }
 
     @Override
@@ -73,6 +103,7 @@ public class ZhihuDailyFragment extends BaseFragment implements ZhihuDailyContra
 
     /**
      * onCreate 时View还没有测量好  onStart又会影响生命周期
+     *
      * @param savedInstanceState
      */
     @Override
@@ -81,42 +112,35 @@ public class ZhihuDailyFragment extends BaseFragment implements ZhihuDailyContra
 
         Calendar calendar = Calendar.getInstance();// 以当前时间设置日历
         calendar.setTimeZone(TimeZone.getTimeZone("GMT+08"));   // 设置时区
-        mYear=calendar.get(Calendar.YEAR);
-        mMonth=calendar.get(Calendar.MONTH);
-        mDay= calendar.get(Calendar.DAY_OF_MONTH);
+        mYear = calendar.get(Calendar.YEAR);
+        mMonth = calendar.get(Calendar.MONTH);
+        mDay = calendar.get(Calendar.DAY_OF_MONTH);
 
-        Log.e(TAG, mYear+"-"+mMonth+"-"+mDay);
+        Log.e(TAG, mYear + "-" + mMonth + "-" + mDay);
 
         // FIXME  待确定知乎daily每天更新的时间
         String date = DateFormatUtil.formatZhihuDailyDateLongToString(calendar.getTimeInMillis());
         // 首次加载  需要强制刷新 不需要清除缓存
-        if(isFirstLoad){
-            mPresenter.load(true,false,date);
-            isFirstLoad= false;
-        }else{
+        if (isFirstLoad) {
+            mPresenter.load(true, false, date);
+            isFirstLoad = false;
+        } else {
             // 再次打开App,不重新获取，也不清空缓存
-            mPresenter.load(false,false,date);
+            mPresenter.load(false, false, date);
         }
         Log.e(TAG, "onresume");
     }
 
     @Override
     public void onLoadSuccess(List<ZhihuStory> stories) {
-//        mStories.clear();
-//        for(ZhihuStory story:stroies){
-//            if(!mStories.contains(story)){
-//                Log.e(TAG,story.hashCode()+"");
-//                mStories.addAll(stroies);
-//            }
-//        }
+        mStories.clear();
         mStories.addAll(stories);
         mAdapter.notifyDataSetChanged();
-       setIndicator(false);
+        setIndicator(false);
     }
 
     @Override
-    public void onLoadError(Throwable  e) {
-
+    public void onLoadError(Throwable e) {
         setIndicator(false);
     }
 

@@ -65,7 +65,7 @@ public class ZhihuDailyPresenter implements ZhihuDailyContract.Presenter {
     public void load(long date) {
 
         String sDate = DateFormatUtil.formatZhihuDailyDateLongToString(date);
-
+        // 直接返回的一个 ZhihuDailyBean
         RetrofitService.createZhihuDailyService(Api.ZHIHU_DAILY_BASE)
                 .getZhihuDaily(sDate)
                 .take(1)    // 返回一个
@@ -76,8 +76,8 @@ public class ZhihuDailyPresenter implements ZhihuDailyContract.Presenter {
 
     @Override
     public void load(boolean forceUpdate, boolean cleanCache, String date) {
-
-        mLoader.loadZhihuDailySource(forceUpdate, cleanCache, date, new Observer<ZhihuDailyBean>() {
+        // 创建一个观察者处理List<ZhihuStory>
+        mLoader.loadZhihuDailySource(forceUpdate, cleanCache, date, new Observer<List<ZhihuStory>>() {
             @Override
             public void onSubscribe(Disposable d) {
                 Log.e(TAG, "onSubscribe");
@@ -85,14 +85,14 @@ public class ZhihuDailyPresenter implements ZhihuDailyContract.Presenter {
             }
 
             @Override
-            public void onNext(ZhihuDailyBean zhihuDailyBean) {
+            public void onNext(List<ZhihuStory> zhihuStories) {
                 Log.e(TAG, "onnext");
-                String date = zhihuDailyBean.getDate();
-                List<ZhihuStory> stories = zhihuDailyBean.getStories();
-                for (ZhihuStory story : stories) {
-                    story.setDate(date);
-                }
-                mView.onLoadSuccess(stories);
+//                String date = zhihuDailyBean.getDate();
+//                List<ZhihuStory> stories = zhihuDailyBean.getStories();
+//                for (ZhihuStory story : stories) {
+//                    story.setDate(date);
+//                }
+                mView.onLoadSuccess(zhihuStories);
             }
 
             @Override
